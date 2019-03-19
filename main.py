@@ -1,0 +1,179 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+
+import argparse
+import logging
+import multiprocessing
+import os
+
+import nltk
+import scipy
+from nltk.corpus import wordnet, wordnet_ic
+from scipy.stats import spearmanr
+
+from models.embedding import (BERT_Model, ELMo_Model, Fasttext_Model,
+                              GloVe_Model, Word2Vec_Model)
+from models.googlesearch import *
+from models.wiki import *
+
+log_format = "%(asctime)s %(message)s"
+logging.basicConfig(
+    filename="word_similarity_computing.log",
+    filemode="a",
+    level=logging.INFO,
+    format=log_format,
+    datefmt="%m/%d %I:%M:%S %p",
+)
+logger = logging.getLogger("word_similarity")
+
+dataset_dict = {
+    "MEN": "EN-MEN-TR-3k.txt",
+    "MTurk-771": "EN-MTurk-771.txt",
+    "RW-STANFORD": "EN-RW-STANFORD.txt",
+    "SimLex-999": "EN-SIMLEX-999.txt",
+    "SimVerb-3500": "EN-SimVerb-3500.txt"
+}
+def get_args():
+    parser = argparse.ArgumentParser("cifar")
+    parser.add_argument('--method_id', type=int, default=1, help='method id')
+    return parser.parse_args()
+
+
+def loop_wordnet(method,sysnet1,sysnet2,ic):
+    score_list = []
+    for item1 in sysnet1:
+        for item2 in sysnet2:
+            if item1.name().split(".")[1] == item2.name().split(".")[1]:
+                try:
+                    score = getattr(wordnet, method)(item1, item2,ic)
+                    score_list.append(score)
+                except:
+                    continue
+
+    return score_list
+def wordnet_based_methods(dataset):
+    print("WordNet-based methods start")
+    logger.info("WordNet-based methods start")
+    methods = ["path_similarity", "wup_similarity", "lch_similarity",
+               "res_similarity", "jcn_similarity", "lin_similarity"]
+
+    results = {}
+    for method in methods:
+        print("Method {} on dataset {}".format(method, dataset))
+        filename = dataset_dict[dataset]
+        simScore, predScore = [], []
+        unk, total_size = 0, 0
+        for line in open(os.path.join("data", filename)):
+            line = line.strip().lower()
+            word1, word2, val = line.split()
+            simScore.append(float(val))
+            sysnet1 = wordnet.synsets(word1)
+            sysnet2 = wordnet.synsets(word2)
+            # use brown corpus as information content
+            brown_ic = wordnet_ic.ic('ic-brown.dat')
+            if method ==  "path_similarity" or method ==  "wup_similarity":
+                score_list = [getattr(wordnet, method)(item1, item2) for item1 in sysnet1 for item2 in sysnet2]
+            elif method ==  "lch_similarity":
+                score_list = [getattr(wordnet, method)(item1, item2) for item1 in sysnet1 for item2 in sysnet2 if item1.name().split(".")[1] == item2.name().split(".")[1]]
+            else:
+                score_list = loop_wordnet(method,sysnet1,sysnet2,brown_ic)
+            # remove None object
+            score_list = [item for item in score_list if item is not None]
+            score = max(score_list) if len(score_list) > 0 else None
+            if score is None:
+                predScore.append(0)
+                unk += 1
+            else:
+                predScore.append(score)
+
+            total_size += 1
+        logger.info("Method {} on dataset {}".format(method, dataset))
+        logger.info("Total size: {}, Not Found {}".format(total_size, unk))
+        correlation = spearmanr(simScore, predScore)
+        logger.info("Spearman correlation: {}".format(correlation))
+        results[method] = correlation
+
+    print("WordNet-based methods end")
+    logger.info("WordNet-based methods end")
+    return dataset,results
+
+
+def wiki_based_methods(dataset):
+    print("Wiki-based methods start")
+    logger.info("Wiki-based methods start")
+
+
+    print("Wiki-based methods end")
+    logger.info("Wiki-based methods end")
+
+
+def googlesearch_based_methods(dataset):
+    print("GoogleSearch-based methods start")
+    logger.info("GoogleSearch-based methods start")
+
+    print("GoogleSearch-based methods end")
+    logger.info("GoogleSearch-based methods end")
+
+
+def representation_learning_methods(dataset):
+    print("Embedding methods start")
+    logger.info("Embedding methods start")
+    
+    methods = ["Word2Vec_Model", "Fasttext_Model", "GloVe_Model", "ELMo_Model", "BERT_Model"]
+    methods = ["BERT_Model"]
+    results = {}
+    for method in methods:
+        print("Method {} on dataset {}".format(method, dataset))
+        model = eval(method)()
+        filename = dataset_dict[dataset]
+        simScore, predScore = [], []
+        unk, total_size = 0, 0
+        for line in open(os.path.join("data", filename)):
+            line = line.strip().lower()
+            word1, word2, val = line.split()
+            simScore.append(float(val))
+            score = model.similarity(word1,word2)
+            if score is None:
+                predScore.append(0)
+                unk += 1
+            else:
+                predScore.append(score)
+
+            total_size += 1
+        logger.info("Method {} on dataset {}".format(method, dataset))
+        logger.info("Total size: {}, Not Found {}".format(total_size, unk))
+        correlation = spearmanr(simScore, predScore)
+        logger.info("Spearman correlation: {}".format(correlation))
+        results[method] = correlation
+        del model
+
+    print("Embedding methods end")
+    logger.info("Embedding methods end")
+    return dataset,results
+
+
+def main():
+    args = get_args() 
+    # pool = multiprocessing.Pool(processes=len(dataset_dict))
+    # if args.method_id == 0:
+    #     method_func = wordnet_based_methods
+    # elif args.method_id == 1:
+    #     method_func = representation_learning_methods
+    # elif args.method_id == 2:
+    #     method_func = googlesearch_based_methods
+    # elif args.method_id == 3:
+    #     method_func = wiki_based_methods
+    # else: 
+    #     raise NotImplementedError("The method not implement yet")
+    # results_list = pool.map(method_func, dataset_dict)
+    # print(results_list)
+    for dataset in dataset_dict.keys():
+        results_list =representation_learning_methods(dataset)
+        print(results_list)
+
+
+
+
+
+if __name__ == "__main__":
+    main()
