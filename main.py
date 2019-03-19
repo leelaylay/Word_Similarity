@@ -13,7 +13,7 @@ from scipy.stats import spearmanr
 
 from models.embedding import (BERT_Model, ELMo_Model, Fasttext_Model,
                               GloVe_Model, Word2Vec_Model)
-from models.googlesearch import *
+from models.googlesearch import GoogleSearch
 from models.wiki import *
 
 log_format = "%(asctime)s %(message)s"
@@ -35,7 +35,7 @@ dataset_dict = {
 }
 def get_args():
     parser = argparse.ArgumentParser("cifar")
-    parser.add_argument('--method_id', type=int, default=1, help='method id')
+    parser.add_argument('--method_id', type=int, default=2, help='method id')
     return parser.parse_args()
 
 
@@ -110,9 +110,32 @@ def wiki_based_methods(dataset):
 def googlesearch_based_methods(dataset):
     print("GoogleSearch-based methods start")
     logger.info("GoogleSearch-based methods start")
+    methods = ["WebJaccard","WebOverlap", "WebDice", "WebPMI",
+               "NGD"]
+    results = {}
+    predScore = {}
+    for method in methods:
+        predScore[method] = []
+
+    filename = dataset_dict[dataset]
+    simScore = []
+    for line in open(os.path.join("data", filename)):
+        line = line.strip().lower()
+        word1, word2, val = line.split()
+        simScore.append(float(val))
+        model = GoogleSearch(word1,word2)
+        for method in methods:
+            score = getattr(GoogleSearch,method)
+            predScore[method].append(score)
+
+    for method in methods:
+        correlation = spearmanr(simScore, predScore[method])
+        logger.info("Spearman correlation: {}".format(correlation))
+        results[method] = correlation
 
     print("GoogleSearch-based methods end")
     logger.info("GoogleSearch-based methods end")
+    return dataset, results
 
 
 def representation_learning_methods(dataset):
@@ -120,7 +143,7 @@ def representation_learning_methods(dataset):
     logger.info("Embedding methods start")
     
     methods = ["Word2Vec_Model", "Fasttext_Model", "GloVe_Model", "ELMo_Model", "BERT_Model"]
-    methods = ["BERT_Model"]
+    # methods = ["ELMo_Model"]
     results = {}
     for method in methods:
         print("Method {} on dataset {}".format(method, dataset))
@@ -145,7 +168,6 @@ def representation_learning_methods(dataset):
         correlation = spearmanr(simScore, predScore)
         logger.info("Spearman correlation: {}".format(correlation))
         results[method] = correlation
-        del model
 
     print("Embedding methods end")
     logger.info("Embedding methods end")
@@ -154,22 +176,19 @@ def representation_learning_methods(dataset):
 
 def main():
     args = get_args() 
-    # pool = multiprocessing.Pool(processes=len(dataset_dict))
-    # if args.method_id == 0:
-    #     method_func = wordnet_based_methods
-    # elif args.method_id == 1:
-    #     method_func = representation_learning_methods
-    # elif args.method_id == 2:
-    #     method_func = googlesearch_based_methods
-    # elif args.method_id == 3:
-    #     method_func = wiki_based_methods
-    # else: 
-    #     raise NotImplementedError("The method not implement yet")
-    # results_list = pool.map(method_func, dataset_dict)
-    # print(results_list)
-    for dataset in dataset_dict.keys():
-        results_list =representation_learning_methods(dataset)
-        print(results_list)
+    pool = multiprocessing.Pool(processes=len(dataset_dict))
+    if args.method_id == 0:
+        results_list = pool.map(wordnet_based_methods, dataset_dict)   
+    elif args.method_id == 1:
+        results_list = pool.map(representation_learning_methods, dataset_dict)
+    elif args.method_id == 2:
+        results_list = pool.map(googlesearch_based_methods, dataset_dict)
+    elif args.method_id == 3:
+        results_list = pool.map(wiki_based_methods, dataset_dict)
+    else: 
+        raise NotImplementedError("The method not implement yet")
+
+    print(results_list)
 
 
 
