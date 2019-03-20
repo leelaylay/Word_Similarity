@@ -8,7 +8,7 @@
 import os
 
 import gensim
-from gensim.matutils import hellinger
+from gensim.matutils import hellinger, cossim
 
 
 class LSAModel:
@@ -16,12 +16,13 @@ class LSAModel:
         if os.path.isfile("lsa.model"):
             self.model = gensim.models.lsimodel.LsiModel.load("lsa.model")
         else:
-            id2word = gensim.corpora.Dictionary.load_from_text('wiki_en_wordids.txt')
+            id2word = gensim.corpora.Dictionary.load_from_text(
+                'wiki_en_wordids.txt')
             mm = gensim.corpora.MmCorpus('wiki_en_tfidf.mm')
-            self.model = gensim.models.lsimodel.LsiModel(corpus=mm, id2word=id2word, num_topics=400)
+            self.model = gensim.models.lsimodel.LsiModel(
+                corpus=mm, id2word=id2word, num_topics=400)
             self.model.save("lsa.model")
 
-    
     def similarity(self, word1: str, word2: str):
         if word1 is None or word2 is None:
             return None
@@ -31,10 +32,10 @@ class LSAModel:
                 bow_word2 = self.model.id2word.doc2bow([word2])
                 lsa_bow_word1 = self.model[bow_word1]
                 lsa_bow_word2 = self.model[bow_word2]
-                hellinger_similarity = hellinger(lsa_bow_word1,lsa_bow_word2)
+                cos_similarity = cossim(lsa_bow_word1, lsa_bow_word2)
             except KeyError:
-                hellinger_similarity = 0
-            return 1 - hellinger_similarity
+                cos_similarity = 0
+            return cos_similarity
 
 
 class LDAModel:
@@ -42,12 +43,13 @@ class LDAModel:
         if os.path.isfile("lda.model"):
             self.model = gensim.models.ldamodel.LdaModel.load("lda.model")
         else:
-            id2word = gensim.corpora.Dictionary.load_from_text('wiki_en_wordids.txt')
+            id2word = gensim.corpora.Dictionary.load_from_text(
+                'wiki_en_wordids.txt')
             mm = gensim.corpora.MmCorpus('wiki_en_tfidf.mm')
-            self.model = gensim.models.ldamodel.LdaModel(corpus=mm, id2word=id2word, num_topics=400, update_every=1, passes=1)
+            self.model = gensim.models.ldamodel.LdaModel(
+                corpus=mm, id2word=id2word, num_topics=400, update_every=1, passes=1)
             self.model.save("lda.model")
-        
-    
+
     def similarity(self, word1: str, word2: str):
         if word1 is None or word2 is None:
             return None
@@ -57,7 +59,7 @@ class LDAModel:
                 bow_word2 = self.model.id2word.doc2bow([word2])
                 lda_bow_word1 = self.model[bow_word1]
                 lda_bow_word2 = self.model[bow_word2]
-                hellinger_similarity = hellinger(lda_bow_word1,lda_bow_word2)
+                cos_similarity = cossim(lda_bow_word1, lda_bow_word2)
             except KeyError:
-                hellinger_similarity = 0
-            return 1 - hellinger_similarity
+                cos_similarity = 0
+            return cos_similarity

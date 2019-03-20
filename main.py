@@ -33,24 +33,28 @@ dataset_dict = {
     "SimLex-999": "EN-SIMLEX-999.txt",
     "SimVerb-3500": "EN-SimVerb-3500.txt"
 }
+
+
 def get_args():
     parser = argparse.ArgumentParser("cifar")
     parser.add_argument('--method_id', type=int, default=3, help='method id')
     return parser.parse_args()
 
 
-def loop_wordnet(method,sysnet1,sysnet2,ic):
+def loop_wordnet(method, sysnet1, sysnet2, ic):
     score_list = []
     for item1 in sysnet1:
         for item2 in sysnet2:
             if item1.name().split(".")[1] == item2.name().split(".")[1]:
                 try:
-                    score = getattr(wordnet, method)(item1, item2,ic)
+                    score = getattr(wordnet, method)(item1, item2, ic)
                     score_list.append(score)
                 except:
                     continue
 
     return score_list
+
+
 def wordnet_based_methods(dataset):
     print("WordNet-based methods start")
     logger.info("WordNet-based methods start")
@@ -71,12 +75,14 @@ def wordnet_based_methods(dataset):
             sysnet2 = wordnet.synsets(word2)
             # use brown corpus as information content
             brown_ic = wordnet_ic.ic('ic-brown.dat')
-            if method ==  "path_similarity" or method ==  "wup_similarity":
-                score_list = [getattr(wordnet, method)(item1, item2) for item1 in sysnet1 for item2 in sysnet2]
-            elif method ==  "lch_similarity":
-                score_list = [getattr(wordnet, method)(item1, item2) for item1 in sysnet1 for item2 in sysnet2 if item1.name().split(".")[1] == item2.name().split(".")[1]]
+            if method == "path_similarity" or method == "wup_similarity":
+                score_list = [getattr(wordnet, method)(item1, item2)
+                              for item1 in sysnet1 for item2 in sysnet2]
+            elif method == "lch_similarity":
+                score_list = [getattr(wordnet, method)(item1, item2) for item1 in sysnet1 for item2 in sysnet2 if item1.name(
+                ).split(".")[1] == item2.name().split(".")[1]]
             else:
-                score_list = loop_wordnet(method,sysnet1,sysnet2,brown_ic)
+                score_list = loop_wordnet(method, sysnet1, sysnet2, brown_ic)
             # remove None object
             score_list = [item for item in score_list if item is not None]
             score = max(score_list) if len(score_list) > 0 else None
@@ -95,14 +101,14 @@ def wordnet_based_methods(dataset):
 
     print("WordNet-based methods end")
     logger.info("WordNet-based methods end")
-    return dataset,results
+    return dataset, results
 
 
 def wiki_based_methods(dataset):
     print("Wiki-based methods start")
     logger.info("Wiki-based methods start")
 
-    methods = ["LDAModel","LSAModel"]
+    methods = ["LDAModel", "LSAModel"]
     results = {}
     predScore = {}
     for method in methods:
@@ -114,9 +120,9 @@ def wiki_based_methods(dataset):
         line = line.strip().lower()
         word1, word2, val = line.split()
         simScore.append(float(val))
-        model = GoogleSearch(word1,word2)
+        model = GoogleSearch(word1, word2)
         for method in methods:
-            score = getattr(model,method)
+            score = getattr(model, method)
             print(score)
             predScore[method].append(score)
 
@@ -134,7 +140,7 @@ def wiki_based_methods(dataset):
 def googlesearch_based_methods(dataset):
     print("GoogleSearch-based methods start")
     logger.info("GoogleSearch-based methods start")
-    methods = ["WebJaccard","WebOverlap", "WebDice", "WebPMI",
+    methods = ["WebJaccard", "WebOverlap", "WebDice", "WebPMI",
                "NGD"]
     results = {}
     predScore = {}
@@ -147,9 +153,9 @@ def googlesearch_based_methods(dataset):
         line = line.strip().lower()
         word1, word2, val = line.split()
         simScore.append(float(val))
-        model = GoogleSearch(word1,word2)
+        model = GoogleSearch(word1, word2)
         for method in methods:
-            score = getattr(model,method)
+            score = getattr(model, method)
             print(score)
             predScore[method].append(score)
 
@@ -167,8 +173,9 @@ def googlesearch_based_methods(dataset):
 def representation_learning_methods(dataset):
     print("Embedding methods start")
     logger.info("Embedding methods start")
-    
-    methods = ["Word2Vec_Model", "Fasttext_Model", "GloVe_Model", "ELMo_Model", "BERT_Model"]
+
+    methods = ["Word2Vec_Model", "Fasttext_Model",
+               "GloVe_Model", "ELMo_Model", "BERT_Model"]
     results = {}
     for method in methods:
         print("Method {} on dataset {}".format(method, dataset))
@@ -180,7 +187,7 @@ def representation_learning_methods(dataset):
             line = line.strip().lower()
             word1, word2, val = line.split()
             simScore.append(float(val))
-            score = model.similarity(word1,word2)
+            score = model.similarity(word1, word2)
             if score is None:
                 predScore.append(0)
                 unk += 1
@@ -196,27 +203,24 @@ def representation_learning_methods(dataset):
 
     print("Embedding methods end")
     logger.info("Embedding methods end")
-    return dataset,results
+    return dataset, results
 
 
 def main():
-    args = get_args() 
+    args = get_args()
     pool = multiprocessing.Pool(processes=len(dataset_dict))
     if args.method_id == 0:
-        results_list = pool.map(wordnet_based_methods, dataset_dict)   
+        results_list = pool.map(wordnet_based_methods, dataset_dict)
     elif args.method_id == 1:
         results_list = pool.map(representation_learning_methods, dataset_dict)
     elif args.method_id == 2:
         results_list = pool.map(googlesearch_based_methods, dataset_dict)
     elif args.method_id == 3:
         results_list = pool.map(wiki_based_methods, dataset_dict)
-    else: 
+    else:
         raise NotImplementedError("The method not implement yet")
 
     print(results_list)
-
-
-
 
 
 if __name__ == "__main__":
