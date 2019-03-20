@@ -1,5 +1,5 @@
 # Word Similarity
-Word similarity calculation on the dataset [Mturk-771](http://www2.mta.ac.il/~gideon/mturk771.html).
+Word similarity calculation mainly on the dataset [Mturk-771](http://www2.mta.ac.il/~gideon/mturk771.html).
 
 1. wordnet: path_similarity, wup_similarity, lch_similarity, res_similarity, jcn_similarity, lin_similarity (WordNet-based)
 2. SimByGoogleSearch, WebJaccard, WebOverlap, WebDice, WebPMI, NGD (Google Search Based)
@@ -16,11 +16,11 @@ Word similarity calculation on the dataset [Mturk-771](http://www2.mta.ac.il/~gi
 | $Sim_{Resnik}$  | 0.4168                | 0.3610          | 0.0539                 | 0.3595                | 0.4471                  |
 | $Sim_{Jcn}$     | 0.4823                | 0.3343          | 0.0019                 | 0.4574                | 0.4629                  |
 | $Sim_{Lin}$     | 0.4931                | 0.3338          | 0.0147                 | 0.4047                | 0.4712                  |
-| WebJaccard      |                       |                 |                        |                       |                         |
-| WebOverlap      |                       |                 |                        |                       |                         |
-| WebDice         |                       |                 |                        |                       |                         |
-| WebPMI          |                       |                 |                        |                       |                         |
-| NGD             |                       |                 |                        |                       |                         |
+| WebJaccard      | 0.3272                |                 |                        |                       |                         |
+| WebOverlap      | 0.2346                |                 |                        |                       |                         |
+| WebDice         | 0.3351                |                 |                        |                       |                         |
+| WebPMI          | 0.3272                |                 |                        |                       |                         |
+| NGD             | 0.3282                |                 |                        |                       |                         |
 | LSA-Wikipedia   |                       |                 |                        |                       |                         |
 | LDA-Wikipedia   |                       |                 |                        |                       |                         |
 | Word2Vec        | 0.6713                | 0.7321          | 0.4527                 | 0.4420                | 0.3635                  |
