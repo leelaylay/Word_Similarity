@@ -14,7 +14,7 @@ from scipy.stats import spearmanr
 from models.embedding import (BERT_Model, ELMo_Model, Fasttext_Model,
                               GloVe_Model, Word2Vec_Model)
 from models.googlesearch import GoogleSearch
-from models.wiki import *
+from models.wiki import LDAModel, LSAModel
 
 log_format = "%(asctime)s %(message)s"
 logging.basicConfig(
@@ -27,15 +27,15 @@ logging.basicConfig(
 logger = logging.getLogger("word_similarity")
 
 dataset_dict = {
-    # "MEN": "EN-MEN-TR-3k.txt",
+    "MEN": "EN-MEN-TR-3k.txt",
     "MTurk-771": "EN-MTurk-771.txt",
-    # "RW-STANFORD": "EN-RW-STANFORD.txt",
-    # "SimLex-999": "EN-SIMLEX-999.txt",
-    # "SimVerb-3500": "EN-SimVerb-3500.txt"
+    "RW-STANFORD": "EN-RW-STANFORD.txt",
+    "SimLex-999": "EN-SIMLEX-999.txt",
+    "SimVerb-3500": "EN-SimVerb-3500.txt"
 }
 def get_args():
     parser = argparse.ArgumentParser("cifar")
-    parser.add_argument('--method_id', type=int, default=2, help='method id')
+    parser.add_argument('--method_id', type=int, default=3, help='method id')
     return parser.parse_args()
 
 
@@ -102,9 +102,33 @@ def wiki_based_methods(dataset):
     print("Wiki-based methods start")
     logger.info("Wiki-based methods start")
 
+    methods = ["LDAModel","LSAModel"]
+    results = {}
+    predScore = {}
+    for method in methods:
+        predScore[method] = []
+
+    filename = dataset_dict[dataset]
+    simScore = []
+    for line in open(os.path.join("data", filename)):
+        line = line.strip().lower()
+        word1, word2, val = line.split()
+        simScore.append(float(val))
+        model = GoogleSearch(word1,word2)
+        for method in methods:
+            score = getattr(model,method)
+            print(score)
+            predScore[method].append(score)
+
+    for method in methods:
+        correlation = spearmanr(simScore, predScore[method])
+        logger.info("Spearman correlation: {}".format(correlation))
+        results[method] = correlation
 
     print("Wiki-based methods end")
     logger.info("Wiki-based methods end")
+    print(results)
+    return dataset, results
 
 
 def googlesearch_based_methods(dataset):
@@ -125,7 +149,8 @@ def googlesearch_based_methods(dataset):
         simScore.append(float(val))
         model = GoogleSearch(word1,word2)
         for method in methods:
-            score = getattr(GoogleSearch,method)
+            score = getattr(model,method)
+            print(score)
             predScore[method].append(score)
 
     for method in methods:
@@ -135,6 +160,7 @@ def googlesearch_based_methods(dataset):
 
     print("GoogleSearch-based methods end")
     logger.info("GoogleSearch-based methods end")
+    print(results)
     return dataset, results
 
 
@@ -143,7 +169,6 @@ def representation_learning_methods(dataset):
     logger.info("Embedding methods start")
     
     methods = ["Word2Vec_Model", "Fasttext_Model", "GloVe_Model", "ELMo_Model", "BERT_Model"]
-    # methods = ["ELMo_Model"]
     results = {}
     for method in methods:
         print("Method {} on dataset {}".format(method, dataset))
