@@ -27,11 +27,11 @@ logging.basicConfig(
 logger = logging.getLogger("word_similarity")
 
 dataset_dict = {
-    "MEN": "EN-MEN-TR-3k.txt",
+    # "MEN": "EN-MEN-TR-3k.txt",
     "MTurk-771": "EN-MTurk-771.txt",
-    "RW-STANFORD": "EN-RW-STANFORD.txt",
-    "SimLex-999": "EN-SIMLEX-999.txt",
-    "SimVerb-3500": "EN-SimVerb-3500.txt"
+    # "RW-STANFORD": "EN-RW-STANFORD.txt",
+    # "SimLex-999": "EN-SIMLEX-999.txt",
+    # "SimVerb-3500": "EN-SimVerb-3500.txt"
 }
 def get_args():
     parser = argparse.ArgumentParser("cifar")

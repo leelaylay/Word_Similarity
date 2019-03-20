@@ -3,7 +3,7 @@ Word similarity calculation on the dataset [Mturk-771](http://www2.mta.ac.il/~gi
 
 1. wordnet: path_similarity, wup_similarity, lch_similarity, res_similarity, jcn_similarity, lin_similarity (WordNet-based)
 2. SimByGoogleSearch, WebJaccard, WebOverlap, WebDice, WebPMI, NGD (Google Search Based)
-3. ESA-Wikipedia, LDA-Wikipedia (Wikipedia-based)
+3. LSA-Wikipedia, LDA-Wikipedia (Wikipedia-based)
 4. Word2Vec, Fasttext, ELMo, BERT (Representation Learning)
 
 
@@ -21,7 +21,7 @@ Word similarity calculation on the dataset [Mturk-771](http://www2.mta.ac.il/~gi
 | WebDice         |                       |                 |                        |                       |                         |
 | WebPMI          |                       |                 |                        |                       |                         |
 | NGD             |                       |                 |                        |                       |                         |
-| ESA-Wikipedia   |                       |                 |                        |                       |                         |
+| LSA-Wikipedia   |                       |                 |                        |                       |                         |
 | LDA-Wikipedia   |                       |                 |                        |                       |                         |
 | Word2Vec        | 0.6713                | 0.7321          | 0.4527                 | 0.4420                | 0.3635                  |
 | FastText        | 0.7529                | 0.8362          | 0.5713                 | 0.4644                | 0.3649                  |
