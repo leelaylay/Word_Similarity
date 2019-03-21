@@ -115,7 +115,7 @@ def wiki_based_methods(dataset):
         predScore[method] = []
 
     lda_model = LDAModel()
-    lsa_model = LDAModel()
+    lsa_model = LSAModel()
     filename = dataset_dict[dataset]
     simScore = []
     for line in open(os.path.join("data", filename)):
@@ -136,7 +136,6 @@ def wiki_based_methods(dataset):
 
     print("Wiki-based methods end")
     logger.info("Wiki-based methods end")
-    print(results)
     return dataset, results
 
 
@@ -169,7 +168,6 @@ def googlesearch_based_methods(dataset):
 
     print("GoogleSearch-based methods end")
     logger.info("GoogleSearch-based methods end")
-    print(results)
     return dataset, results
 
 

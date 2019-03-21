@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 ''' 
 # download data from http://download.wikimedia.org/enwiki/ 
-# run the command below to get data
+# run the command below to get data, and it takes hours time to preprocess
 # python -m gensim.scripts.make_wiki
 '''
 import os
@@ -29,18 +29,13 @@ class LSAModel:
             return None
         else:
             try:
-                bow_word1 = self.model.id2word.doc2bow([word1])[0][0]
-                bow_word2 = self.model.id2word.doc2bow([word2])[0][0]
-                vec_word1 = self.mm[bow_word1]
-                vec_word2 = self.mm[bow_word2]
+                vec_word1 = self.model.id2word.doc2bow([word1])
+                vec_word2 = self.model.id2word.doc2bow([word2])
                 lsa_bow_word1 = self.model[vec_word1]
                 lsa_bow_word2 = self.model[vec_word2]
-                print(lsa_bow_word1)
-                print(lsa_bow_word2)
                 cos_similarity = cossim(lsa_bow_word1, lsa_bow_word2)
             except KeyError:
                 cos_similarity = 0
-            print(cos_similarity)
             return cos_similarity
 
 
@@ -62,16 +57,11 @@ class LDAModel:
             return None
         else:
             try:
-                bow_word1 = self.model.id2word.doc2bow([word1])[0][0]
-                bow_word2 = self.model.id2word.doc2bow([word2])[0][0]
-                vec_word1 = self.mm[bow_word1]
-                vec_word2 = self.mm[bow_word2]
+                vec_word1 = self.model.id2word.doc2bow([word1])
+                vec_word2 = self.model.id2word.doc2bow([word2])
                 lda_bow_word1 = self.model[vec_word1]
                 lda_bow_word2 = self.model[vec_word2]
-                print(lda_bow_word1)
-                print(lda_bow_word2)
                 cos_similarity = cossim(lda_bow_word1, lda_bow_word2)
             except KeyError:
                 cos_similarity = 0
-            print(cos_similarity)
             return cos_similarity
