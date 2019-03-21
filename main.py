@@ -114,17 +114,20 @@ def wiki_based_methods(dataset):
     for method in methods:
         predScore[method] = []
 
+    lda_model = LDAModel()
+    lsa_model = LDAModel()
     filename = dataset_dict[dataset]
     simScore = []
     for line in open(os.path.join("data", filename)):
         line = line.strip().lower()
         word1, word2, val = line.split()
         simScore.append(float(val))
-        model = GoogleSearch(word1, word2)
-        for method in methods:
-            score = getattr(model, method)
-            print(score)
-            predScore[method].append(score)
+        print("Count:",len(simScore))
+        score_lda = lda_model.similarity(word1,word2)
+        score_lsa = lsa_model.similarity(word1,word2)
+        predScore["LDAModel"].append(score_lda)
+        predScore["LSAModel"].append(score_lsa)
+
 
     for method in methods:
         correlation = spearmanr(simScore, predScore[method])
