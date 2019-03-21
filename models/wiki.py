@@ -17,8 +17,8 @@ class LSAModel:
             self.model = gensim.models.lsimodel.LsiModel.load("lsa.model")
         else:
             id2word = gensim.corpora.Dictionary.load_from_text(
-                'wiki_en_wordids.txt')
-            mm = gensim.corpora.MmCorpus('wiki_en_tfidf.mm')
+                '_wordids.txt.bz2')
+            mm = gensim.corpora.MmCorpus('_tfidf.mm')
             self.model = gensim.models.lsimodel.LsiModel(
                 corpus=mm, id2word=id2word, num_topics=400)
             self.model.save("lsa.model")
@@ -44,8 +44,8 @@ class LDAModel:
             self.model = gensim.models.ldamodel.LdaModel.load("lda.model")
         else:
             id2word = gensim.corpora.Dictionary.load_from_text(
-                'wiki_en_wordids.txt')
-            mm = gensim.corpora.MmCorpus('wiki_en_tfidf.mm')
+                '_wordids.txt.bz2')
+            mm = gensim.corpora.MmCorpus('_tfidf.mm')
             self.model = gensim.models.ldamodel.LdaModel(
                 corpus=mm, id2word=id2word, num_topics=400, update_every=1, passes=1)
             self.model.save("lda.model")
