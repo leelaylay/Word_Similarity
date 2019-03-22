@@ -2,15 +2,18 @@
 # -*- coding:utf-8 -*-
 
 import gensim
+import sklearn
+import tensorflow as tf
+import torch
+import torch.nn.functional as F
 from gensim.models import KeyedVectors
 from gensim.models.wrappers import FastText
 from gensim.scripts.glove2word2vec import glove2word2vec
-from pytorch_pretrained_bert import BertModel, BertTokenizer
-import torch
-import torch.nn.functional as F
+from sklearn.metrics.pairwise import cosine_similarity
 
-import tensorflow as tf
 import tensorflow_hub as hub
+from elmoformanylangs import Embedder
+from pytorch_pretrained_bert import BertModel, BertTokenizer
 
 
 class Word2Vec_Model():
@@ -61,8 +64,26 @@ class GloVe_Model():
                 cos_similarity = 0
             return cos_similarity
 
-
 class ELMo_Model():
+    # follow the below repo to download the data
+    # https://github.com/HIT-SCIR/ELMoForManyLangs
+    def __init__(self):
+        self.model = Embedder('elmo_model/')
+
+    def similarity(self, word1: str, word2: str):
+        if word1 is None or word2 is None:
+            return None
+        else:
+            try:
+                vec_word1 = self.model.sents2elmo([[word1]])[0]
+                vec_word2 = self.model.sents2elmo([[word2]])[0]
+                cos_similarity = cosine_similarity(vec_word1,vec_word2)[0][0]
+            except KeyError:
+                cos_similarity = 0
+            return cos_similarity
+
+class ELMo_Model_Old():
+    # old version, too slow
     def __init__(self):
         self.model = hub.Module(
             "https://tfhub.dev/google/elmo/2", trainable=False)
@@ -83,7 +104,6 @@ class ELMo_Model():
                 results = tf.reduce_sum(
                     tf.multiply(normalize_a, normalize_b))
                 cos_similarity = sess.run(results)
-                print(cos_similarity)
             except KeyError:
                 cos_similarity = 0
             return cos_similarity
@@ -121,7 +141,6 @@ class BERT_Model():
                 #     encoded_layers2, pooled_output2 = self.model(word2_index)
                 # cos_similarity = F.cosine_similarity(
                 #     pooled_output1, pooled_output2).detach().numpy()[0]
-                # print(cos_similarity)
             except KeyError:
                 cos_similarity = 0
             return cos_similarity

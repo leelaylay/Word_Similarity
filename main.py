@@ -37,7 +37,7 @@ dataset_dict = {
 
 def get_args():
     parser = argparse.ArgumentParser("cifar")
-    parser.add_argument('--method_id', type=int, default=3, help='method id')
+    parser.add_argument('--method_id', type=int, default=1, help='method id')
     return parser.parse_args()
 
 
@@ -158,7 +158,7 @@ def googlesearch_based_methods(dataset):
         model = GoogleSearch(word1, word2)
         for method in methods:
             score = getattr(model, method)
-            print(score)
+            # print(score)
             predScore[method].append(score)
 
     for method in methods:
@@ -177,6 +177,7 @@ def representation_learning_methods(dataset):
 
     methods = ["Word2Vec_Model", "Fasttext_Model",
                "GloVe_Model", "ELMo_Model", "BERT_Model"]
+    methods = ["ELMo_Model"]
     results = {}
     for method in methods:
         print("Method {} on dataset {}".format(method, dataset))
@@ -188,6 +189,7 @@ def representation_learning_methods(dataset):
             line = line.strip().lower()
             word1, word2, val = line.split()
             simScore.append(float(val))
+            print("Count:",len(simScore))
             score = model.similarity(word1, word2)
             if score is None:
                 predScore.append(0)
