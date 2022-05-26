@@ -4,7 +4,7 @@ gensim==3.4.0
 pytorch_pretrained_bert==0.6.1
 torch==1.0.1.post2
 h5py==2.8.0
-tensorflow==1.13.1
+tensorflow==2.7.2
 nltk==3.4.5
 setuptools==39.0.1
 scipy==1.0.1
