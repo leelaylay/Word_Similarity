@@ -1,5 +1,5 @@
 tensorflow_hub==0.3.0
-numpy==1.14.2
+numpy==1.22.0
 gensim==3.4.0
 pytorch_pretrained_bert==0.6.1
 torch==1.0.1.post2
