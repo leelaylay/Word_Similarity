@@ -6,7 +6,7 @@ torch==1.0.1.post2
 h5py==2.8.0
 tensorflow==1.13.1
 nltk==3.4.5
-setuptools==39.0.1
+setuptools==65.5.1
 scipy==1.0.1
 protobuf==3.7.0
 overrides==1.9
